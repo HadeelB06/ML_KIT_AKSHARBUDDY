@@ -1,0 +1,87 @@
+00:00 +0: loading C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/api_test.dart
+00:00 +0: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/api_test.dart: original-only ML Kit build does not send passages for simplification
+00:01 +1: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_test.dart: word saves survive reload and are deduplicated by language and spelling
+00:01 +2: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_test.dart: concurrent updates do not lose words
+00:01 +3: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_test.dart: streaks use calendar dates and allow today to be unfinished
+00:01 +4: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_test.dart: repeated finish id cannot inflate totals, goals persist and clamp
+00:01 +5: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_test.dart: damaged entries do not prevent valid records loading
+00:01 +6: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_test.dart: word cleanup preserves Hindi and Marathi combining marks
+00:04 +7: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: brand and new home render in light and dark
+00:06 +8: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: brand and new home render in light and dark
+00:06 +9: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: brand and new home render in light and dark
+00:06 +10: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: brand and new home render in light and dark
+00:07 +10: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/core_test.dart: native speech progress supersedes fallback and completion clears state
+engine=null locale=hi-IN available=true
+voice=offline-hi-IN set=1
+00:07 +11: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: brand and new home render in light and dark
+00:07 +11: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/core_test.dart: fallback scales with selected rate and disposal cancels it
+engine=null locale=mr-IN available=true
+voice=offline-mr-IN set=1
+00:07 +12: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: brand and new home render in light and dark
+00:07 +12: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/core_test.dart: missing Hindi voice explains installation without switching language
+engine=null locale=hi-IN available=false
+engine=null locale=hi_IN available=false
+engine=null locale=hi available=false
+00:07 +13: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: brand and new home render in light and dark
+00:08 +14: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: brand and new home render in light and dark
+00:10 +15: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:11 +16: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:11 +17: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:11 +18: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:12 +19: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:12 +20: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:12 +21: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:13 +22: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:14 +23: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:14 +24: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:15 +25: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:15 +26: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: progress replaced by settings in navigation
+00:18 +27: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/new_features_test.dart: Marathi selection updates visible welcome copy
+00:18 +28: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/new_features_test.dart: Marathi selection updates visible welcome copy
+00:18 +29: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/new_features_test.dart: Marathi selection updates visible welcome copy
+00:20 +30: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/new_features_test.dart: Marathi selection updates visible welcome copy
+00:21 +31: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/new_features_test.dart: Marathi selection updates visible welcome copy
+00:22 +32: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/new_features_test.dart: Marathi selection updates visible welcome copy
+00:22 +33: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/new_features_test.dart: Marathi selection updates visible welcome copy
+00:22 +34: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: listen pauses and resumes through device speech interface
+engine=null locale=en-IN available=1
+voice=offline-en-IN set=1
+00:25 +35: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: settings exposes language and assistant controls for the offline app
+00:25 +36: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/new_features_test.dart: font preview fits a phone and does not apply when closed
+00:26 +36: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: saved reading resumes from the stored character position
+engine=null locale=en-IN available=1
+voice=offline-en-IN set=1
+00:26 +37: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/new_features_test.dart: font preview fits a phone and does not apply when closed
+00:28 +38: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: saved words can be marked known and filtered
+00:29 +38: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/new_features_test.dart: assistant speech cannot replace reader progress callback
+engine=null locale=en-IN available=1
+voice=english set=1
+00:29 +39: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/buddy_ui_test.dart: saved words can be marked known and filtered
+00:29 +40: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: guest reading remains available when Firebase cannot initialize
+00:30 +41: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: guest reading remains available when Firebase cannot initialize
+00:30 +42: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/final_reader_test.dart: guest reading remains available when Firebase cannot initialize
+00:31 +43: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/preview_gallery_test.dart: Marathi welcome and preview fit a phone
+00:32 +44: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/preview_gallery_test.dart: Marathi welcome and preview fit a phone
+00:33 +45: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/preview_gallery_test.dart: Marathi welcome and preview fit a phone
+00:34 +46: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/preview_gallery_test.dart: Marathi welcome and preview fit a phone
+00:34 +47: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/preview_gallery_test.dart: Marathi welcome and preview fit a phone
+00:34 +48: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/preview_gallery_test.dart: Marathi welcome and preview fit a phone
+00:34 +49: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/preview_gallery_test.dart: Marathi welcome and preview fit a phone
+00:34 +50: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/preview_gallery_test.dart: Marathi welcome and preview fit a phone
+00:34 +51: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/preview_gallery_test.dart: Marathi welcome and preview fit a phone
+00:37 +52: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/tts_queue_test.dart: chunk queue maps progress and completes only after the last chunk
+engine=test.engine locale=mr-IN available=1
+voice=marathi-offline set=1
+00:37 +53: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/tts_queue_test.dart: stop prevents later completion from advancing queue
+engine=test.engine locale=mr-IN available=1
+voice=marathi-offline set=1
+00:38 +54: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/tts_queue_test.dart: missing offline Marathi voice never falls back to network or Hindi
+engine=test.engine locale=mr-IN available=1
+no installed offline voice for mr
+engine=test.engine locale=mr_IN available=1
+no installed offline voice for mr
+engine=test.engine locale=mr available=1
+no installed offline voice for mr
+00:38 +55: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/word_service_test.dart: word help uses saved meanings offline and respects language
+00:39 +56: C:/Users/ADMIN/Documents/Playground/VOICE_ASSISTANT-work/build/VOICE_ASSISTANT/test/word_service_test.dart: unknown words request a personal note without needing a server
+00:39 +57: All tests passed!

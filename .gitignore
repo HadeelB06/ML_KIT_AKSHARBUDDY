@@ -1,0 +1,24 @@
+# Generated Flutter and platform files
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+**/ephemeral/
+**/.plugin_symlinks/
+**/.symlinks/
+**/.gradle/
+**/.kotlin/
+**/Pods/
+**/local.properties
+**/key.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+*.log
+.env
+.env.*
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
