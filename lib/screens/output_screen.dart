@@ -5,6 +5,7 @@ import '../services/voice_command_handler.dart';
 import '../widgets/assistant_widgets.dart';
 import 'dart:async';
 import '../services/ocr_store.dart';
+import '../models/ocr_document.dart';
 import 'input_result_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/word_help_sheet.dart';
@@ -80,13 +81,27 @@ class OutputScreen extends StatefulWidget {
   State<OutputScreen> createState() => _OutputScreenState();
 }
 
-class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver, LanguageRebuild<OutputScreen> {
+class _OutputScreenState extends State<OutputScreen>
+    with WidgetsBindingObserver, LanguageRebuild<OutputScreen> {
   late final String _readingId =
       widget.readingId ?? DateTime.now().toIso8601String();
   // ── display text state ────────────────────────────────────────────────────
   String simplifiedText = '';
   bool _originalSelected = false;
   String _resultText = '';
+  OcrDocument? _document;
+  int _pageIndex = 0;
+  bool _loadingPages = false;
+  bool _positionReady = false;
+  String? _documentWarning;
+  final ScrollController _readerScroll = ScrollController();
+  OcrPage? get _page => _document == null || _document!.pages.isEmpty
+      ? null
+      : _document!.pages[_pageIndex];
+  String? get _currentOriginal => _page?.rawOcrText ?? widget.originalText;
+  String get _positionKey =>
+      _page == null ? _readingId : '${_readingId}_page_${_page!.pageNumber}';
+
   int _speechOffset = 0;
   int _pausedOffset = 0;
   bool _paused = false;
@@ -179,7 +194,7 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
       HighlightedTextView.splitToWords(text);
 
   // ── load pre-formatted result (from ReadingScreen) ────────────────────────
-  void _loadInitialFormatResult(FormatResult r) {
+  void _loadInitialFormatResult(FormatResult r) async {
     if (!mounted) return;
     stopReading();
     setState(() {
@@ -190,25 +205,56 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
     });
     _saveToLibrary(r.processedText, r.sourceType);
     unawaited(LibraryStorage.markOpened(_readingId));
-    unawaited(_restorePosition());
+    await _restorePosition();
     if (autoRead) _tts.setRate(speechRate).then((_) => startReading());
   }
 
   // ── load already-processed / already-saved text — no API call ────────────
-  void _loadDisplayText(String text) {
+  void _loadDisplayText(String text) async {
     if (!mounted) return;
     stopReading();
+    if (widget.extractionRecordPath != null) {
+      setState(() => _loadingPages = true);
+      try {
+        final document = await OcrStore.load(widget.extractionRecordPath!);
+        if (!mounted) return;
+        // Page boundaries are a PDF feature; other input types retain their full text.
+        if (document.sourceType == 'pdf') {
+          if (document.totalPages < 1 ||
+              document.pages.any(
+                (p) => p.pageNumber < 1 || p.pageNumber > document.totalPages,
+              ) ||
+              document.pages.map((p) => p.pageNumber).toSet().length !=
+                  document.pages.length) {
+            throw const FormatException('Invalid PDF page records');
+          }
+          _document = document;
+          if (document.pages.isEmpty) {
+            _documentWarning =
+                'No extracted pages are available. Showing saved text without verified page boundaries.';
+          }
+        }
+      } catch (_) {
+        if (!mounted) return;
+        _documentWarning =
+            'The page record is unavailable. Showing the saved text; page boundaries cannot be verified.';
+      }
+    }
+    if (!mounted) return;
     setState(() {
-      simplifiedText = text;
+      _loadingPages = false;
+      simplifiedText = _page?.displayText ?? text;
       _resultText = text;
-      words = _splitToWords(text);
+      words = _splitToWords(simplifiedText);
     });
     // Save only when the caller (ReadingScreen) signals fresh content via
     // saveOnLoad: true. LibraryScreen and HomeScreen leave saveOnLoad at its
     // default (false), so reopening existing items never creates duplicates.
-    if (widget.saveOnLoad) _saveToLibrary(text, 'text');
+    if (widget.saveOnLoad) {
+      _saveToLibrary(text, _document?.sourceType ?? 'text');
+    }
     unawaited(LibraryStorage.markOpened(_readingId));
-    unawaited(_restorePosition());
+    await _restorePosition();
     if (autoRead) _tts.setRate(speechRate).then((_) => startReading());
   }
 
@@ -244,7 +290,12 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
 
   // ── TTS ───────────────────────────────────────────────────────────────────
   void startReading() async {
-    if (!mounted || simplifiedText.isEmpty || _startingSpeech) return;
+    if (!mounted ||
+        _loadingPages ||
+        simplifiedText.isEmpty ||
+        _startingSpeech) {
+      return;
+    }
     if (_speaking) {
       _paused = true;
       await _savePosition();
@@ -289,7 +340,7 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
   }
 
   void repeatSentence() async {
-    if (_startingSpeech || simplifiedText.isEmpty) return;
+    if (_loadingPages || _startingSpeech || simplifiedText.isEmpty) return;
     final before = simplifiedText.substring(
       0,
       _pausedOffset.clamp(0, simplifiedText.length),
@@ -304,36 +355,134 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
   }
 
   void selectVersion(bool original) {
+    if (_loadingPages || (original && _currentOriginal == null)) return;
     stopReading();
     setState(() {
       _originalSelected = original;
-      simplifiedText = original ? widget.originalText! : _resultText;
+      simplifiedText = original
+          ? _currentOriginal!
+          : (_page?.displayText ?? _resultText);
       words = _splitToWords(simplifiedText);
     });
   }
 
   Future<void> _savePosition() async {
+    if (!_positionReady) return;
+    // Snapshot before awaiting so navigation cannot write one page's offset to another.
+    final key = _positionKey;
+    final offset = _pausedOffset;
+    final original = _originalSelected;
+    final page = _page?.pageNumber;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('reading_position_$_readingId', _pausedOffset);
-    await prefs.setBool('reading_original_$_readingId', _originalSelected);
+    await prefs.setInt('reading_position_$key', offset);
+    await prefs.setBool('reading_original_$key', original);
+    if (page != null) await prefs.setInt('reading_page_$_readingId', page);
   }
 
-  Future<void> _restorePosition() async {
+  Future<void> _restorePosition({bool restorePage = true}) async {
     final prefs = await SharedPreferences.getInstance();
-    if (!mounted || widget.readingId == null) return;
-    final original = prefs.getBool('reading_original_$_readingId') ?? false;
+    if (!mounted) return;
+    if (restorePage && _document != null) {
+      final saved = prefs.getInt('reading_page_$_readingId');
+      final index = _document!.pages.indexWhere((p) => p.pageNumber == saved);
+      if (index >= 0) _pageIndex = index;
+    }
+    final key = _positionKey;
     setState(() {
-      if (original && widget.originalText != null) {
-        _originalSelected = true;
-        simplifiedText = widget.originalText!;
-        words = _splitToWords(simplifiedText);
-      }
-      _pausedOffset = (prefs.getInt('reading_position_$_readingId') ?? 0).clamp(
+      _originalSelected =
+          prefs.getBool('reading_original_$key') == true &&
+          _currentOriginal != null;
+      simplifiedText = _originalSelected
+          ? _currentOriginal!
+          : (_page?.displayText ?? _resultText);
+      words = _splitToWords(simplifiedText);
+      _pausedOffset = (prefs.getInt('reading_position_$key') ?? 0).clamp(
         0,
         simplifiedText.length,
       );
       _paused = _pausedOffset > 0 && _pausedOffset < simplifiedText.length;
+      _speaking = false;
+      currentIndex = -1;
+      _speechOffset = 0;
+      _positionReady = true;
     });
+  }
+
+  Future<void> _goToPage(int index) async {
+    if (_loadingPages ||
+        _document == null ||
+        index < 0 ||
+        index >= _document!.pages.length) {
+      return;
+    }
+    setState(() => _loadingPages = true);
+    // Stop audio immediately, then persist the offset without resetting it.
+    ++_playRequest;
+    _startingSpeech = false;
+    _paused = true;
+    await _tts.stop();
+    await _savePosition();
+    if (!mounted) return;
+    _positionReady = false;
+    _pageIndex = index;
+    await _restorePosition(restorePage: false);
+    if (!mounted) return;
+    setState(() => _loadingPages = false);
+    if (_readerScroll.hasClients) _readerScroll.jumpTo(0);
+    await _savePosition();
+  }
+
+  Widget _pageNavigation() {
+    final doc = _document!;
+    final page = _page;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            IconButton.outlined(
+              tooltip: tr('Previous page'),
+              onPressed: _loadingPages || _pageIndex == 0
+                  ? null : () => _goToPage(_pageIndex - 1),
+              icon: const Icon(Icons.chevron_left),
+            ),
+            Expanded(
+              child: LText(
+                page == null ? 'No pages' : AppLocalizations.choose(
+                  'Page ${page.pageNumber} of ${doc.totalPages}',
+                  '${doc.totalPages} में से पृष्ठ ${page.pageNumber}',
+                  '${doc.totalPages} पैकी पान ${page.pageNumber}',
+                ),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            IconButton.outlined(
+              tooltip: tr('Next page'),
+              onPressed: _loadingPages || _pageIndex + 1 >= doc.pages.length
+                  ? null : () => _goToPage(_pageIndex + 1),
+              icon: const Icon(Icons.chevron_right),
+            ),
+          ],
+        ),
+        const LText(
+          'Listen reads this page only. Choose Next page to continue.',
+        ),
+        if (doc.pages.length != doc.totalPages || doc.cancelled)
+          LText(
+            AppLocalizations.choose(
+              '${doc.pages.length} of ${doc.totalPages} pages have extraction records. Other pages were not processed.',
+              '${doc.totalPages} में से ${doc.pages.length} पृष्ठों के रिकॉर्ड उपलब्ध हैं। बाकी पृष्ठों की प्रक्रिया नहीं हुई।',
+              '${doc.totalPages} पैकी ${doc.pages.length} पानांच्या नोंदी उपलब्ध आहेत. इतर पानांवर प्रक्रिया झाली नाही.',
+            ),
+          ),
+        if (page != null && page.status != 'complete')
+          LText(
+            '${tr('Page status')}: ${tr(page.status)}. ${page.error ?? tr("No readable text was extracted.")}',
+          ),
+        const SizedBox(height: 12),
+      ],
+    );
   }
 
   @override
@@ -349,6 +498,7 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_savePosition());
     _tts.dispose();
+    _readerScroll.dispose();
     super.dispose();
   }
 
@@ -388,14 +538,26 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
         break;
       case VoiceCommandIntent.increaseSpeechRate:
       case VoiceCommandIntent.decreaseSpeechRate:
-        setState(() => speechRate = (speechRate + (command == VoiceCommandIntent.increaseSpeechRate ? .05 : -.05)).clamp(.1, .8));
+        setState(
+          () => speechRate =
+              (speechRate +
+                      (command == VoiceCommandIntent.increaseSpeechRate
+                          ? .05
+                          : -.05))
+                  .clamp(.1, .8),
+        );
         await _tts.setRate(speechRate);
         AccessibilitySettings.ttsSpeed = speechRate;
         await AccessibilitySettings.save();
         break;
       case VoiceCommandIntent.increaseFontSize:
       case VoiceCommandIntent.decreaseFontSize:
-        setState(() => AccessibilitySettings.fontSize = (AccessibilitySettings.fontSize + (command == VoiceCommandIntent.increaseFontSize ? 2 : -2)).clamp(16, 36));
+        setState(
+          () => AccessibilitySettings.fontSize =
+              (AccessibilitySettings.fontSize +
+                      (command == VoiceCommandIntent.increaseFontSize ? 2 : -2))
+                  .clamp(16, 36),
+        );
         await AccessibilitySettings.save();
         break;
       case VoiceCommandIntent.changeColors:
@@ -409,7 +571,12 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
   Future<void> _openStylePreview() async {
     await _pauseForAssistant();
     if (!mounted) return;
-    await Navigator.push(context, MaterialPageRoute(builder: (_) => StylePreviewScreen(sample: simplifiedText)));
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => StylePreviewScreen(sample: simplifiedText),
+      ),
+    );
     if (mounted) setState(() {});
   }
 
@@ -805,10 +972,21 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
-      appBar: AppBar(title: const LText('Your reading'), actions: [
-        IconButton(tooltip: tr('Style preview'), onPressed: _openStylePreview, icon: const Icon(Icons.preview_outlined)),
-        IconButton(tooltip: tr('Voice assistant'), onPressed: _openAssistant, icon: const Icon(Icons.mic_none)),
-      ]),
+      appBar: AppBar(
+        title: const LText('Your reading'),
+        actions: [
+          IconButton(
+            tooltip: tr('Style preview'),
+            onPressed: _openStylePreview,
+            icon: const Icon(Icons.preview_outlined),
+          ),
+          IconButton(
+            tooltip: tr('Voice assistant'),
+            onPressed: _openAssistant,
+            icon: const Icon(Icons.mic_none),
+          ),
+        ],
+      ),
 
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -822,6 +1000,7 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
               Padding(
                 padding: const EdgeInsets.all(AppTheme.spaceMD),
                 child: ListView(
+                  controller: _readerScroll,
                   children: [
                     // ── PROFILE SELECTOR ──────────────────────────────────
                     const SizedBox(height: AppTheme.spaceSM),
@@ -831,6 +1010,34 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
 
                     const SizedBox(height: AppTheme.spaceMD),
 
+                    if (_document?.sourceType == 'pdf') _pageNavigation(),
+                    if (_documentWarning != null) LText(_documentWarning!),
+                    if (_loadingPages) const LinearProgressIndicator(),
+                    if (_currentOriginal != null &&
+                        _currentOriginal != (_page?.displayText ?? _resultText))
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          ChoiceChip(
+                            label: const LText('Original'),
+                            selected: _originalSelected,
+                            onSelected: _loadingPages
+                                ? null
+                                : (_) => selectVersion(true),
+                          ),
+                          ChoiceChip(
+                            label: LText(
+                              widget.extractionRecordPath != null
+                                  ? 'Your edits'
+                                  : 'Saved version',
+                            ),
+                            selected: !_originalSelected,
+                            onSelected: _loadingPages
+                                ? null
+                                : (_) => selectVersion(false),
+                          ),
+                        ],
+                      ),
                     if (!hasContent) ...[
                       _emptyState(),
                     ] else ...[
@@ -839,7 +1046,9 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
                         runSpacing: 8,
                         children: [
                           ElevatedButton.icon(
-                            onPressed: _startingSpeech ? null : startReading,
+                            onPressed: _startingSpeech || _loadingPages
+                                ? null
+                                : startReading,
                             icon: const Icon(Icons.volume_up_outlined),
                             label: LText(
                               _startingSpeech
@@ -911,27 +1120,6 @@ class _OutputScreenState extends State<OutputScreen> with WidgetsBindingObserver
                           child: const LText(
                             'Raw text, pages and optional review',
                           ),
-                        ),
-                      if (widget.originalText != null &&
-                          widget.originalText != _resultText)
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            ChoiceChip(
-                              label: const LText('Original'),
-                              selected: _originalSelected,
-                              onSelected: (_) => selectVersion(true),
-                            ),
-                            ChoiceChip(
-                              label: LText(
-                                widget.extractionRecordPath != null
-                                    ? 'Your edits'
-                                    : 'Saved version',
-                              ),
-                              selected: !_originalSelected,
-                              onSelected: (_) => selectVersion(false),
-                            ),
-                          ],
                         ),
                       TextButton.icon(
                         onPressed: repeatSentence,

@@ -1,8 +1,14 @@
-# Delivery verification
+# Current validation — version 1.2.0 (3)
 
 - Flutter analyzer: no issues.
-- Flutter test: 57 tests passed, including saved-word state, local extraction, OCR layout, chunked TTS offsets, Marathi UI selection, style draft persistence, multilingual commands and isolation of assistant speech from reader progress callbacks.
-- Original stale backend tests were updated to the existing ML Kit build's offline-only contract. Missing original golden image baselines were generated. Marathi welcome and preview images were visually inspected and a missing Devanagari fallback was corrected.
-- Final Android debug APK built successfully. Android package metadata and signature checked; all five bundled font families verified inside the APK.
-- 13 core source files match the original ML Kit ZIP byte for byte. Hash evidence is in CORE_PRESERVATION.json.
-- Physical phone installation, microphone recognition, actual installed voices and camera OCR were not tested on a connected phone. These require checking on your device.
+- Complete regression suite: 67 tests passed.
+- PDF-focused coverage: current-page-only speech, no automatic advance, original/edited selection, empty edited version recovery, missing/corrupt page-record fallback, navigation while speaking, independent page offsets, reopening at the saved page, Marathi controls on a narrow phone, failed extraction and cancelled extraction coverage.
+- Android debug APK built successfully; version 1.2.0, build 3. Package metadata, v2 signature and bundled font assets verified.
+- Marathi PDF-reader preview visually inspected; original/edited and speech-speed labels localized.
+- All 13 original core OCR/TTS/storage files still match the ML Kit base byte for byte. See CORE_PRESERVATION.json.
+
+Current evidence files start with `page-upgrade-`. Earlier logs without that prefix describe version 1.1.0 and its 57-test milestone.
+
+Native PDF extraction and TTS are mocked in the automated tests. No connected physical phone was used to validate installation, microphone recognition, actual voice gender or OCR accuracy. The APK remains a test/debug build.
+
+These checks were completed on the local build before publication. See PDF_PAGE_UPGRADE.md for the scope and README.md for setup.

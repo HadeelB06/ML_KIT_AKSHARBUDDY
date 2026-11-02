@@ -4,6 +4,8 @@ Android reading assistant with on-device ML Kit OCR, synchronized read-aloud hig
 
 **English · हिन्दी · मराठी**
 
+Current local build: **1.2.0 (3)** — includes PDF page-by-page reading.
+
 **No laptop backend is needed to use the app.** New users can install the APK directly. A computer is needed only to edit or build the source.
 
 ## Install on your Android phone
@@ -51,6 +53,12 @@ The assistant prefers a female-labelled voice when available. Many Android engin
 5. Return to saved readings through **Library**.
 
 Image OCR and PDF/DOCX extraction run on your phone. Check extracted text against the original, especially for blurry images, unusual layouts or mixed text.
+
+### Read PDFs one page at a time
+
+Use the left/right page arrows beside **Page X of Y**. Listen reads only the current page and does not automatically advance. Each page keeps its own reading position; reopening the reading from Library restores its last selected page. Where a page has edits, switch between **Original** and **Your edits**.
+
+Failed pages remain visible in navigation. A coverage warning tells you when only part of the PDF was processed. If saved page records are missing or damaged, the app shows a warning and falls back to saved text; page boundaries are not guaranteed for that fallback. DOCX and typed text retain their existing reading behaviour.
 
 ### Save words and mark them known
 
@@ -175,7 +183,7 @@ For the maintainer:
 5. Create a GitHub Release and attach **`VOICE_ASSISTANT.apk`** as a release asset instead of committing the large binary to Git history. See [GitHub Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
 6. Direct new users to **Releases → VOICE_ASSISTANT.apk**. You can then add your actual release link near the top of this README.
 
-No repository or download URL is invented here; this delivery has not been published to GitHub.
+The APK should be distributed through GitHub Releases; source code alone is not an installable app.
 
 For production distribution, configure a private release signing key using Flutter’s [Android release guide](https://docs.flutter.dev/deployment/android). The current Gradle release configuration also uses debug signing; running a release build alone does not configure production signing.
 
@@ -196,10 +204,10 @@ For production distribution, configure a private release signing key using Flutt
 ## Verification and scope
 
 - Static analysis: **no issues found**.
-- Automated tests: **57 passed**, covering original reading regressions and new interface/assistant behaviour.
+- Automated tests: **67 passed**, covering original reading regressions and new interface/assistant behaviour.
 - Debug APK: built, signature checked and bundled fonts verified.
 - Thirteen core files match the original ML Kit project byte for byte; see [preservation evidence](docs/CORE_PRESERVATION.json).
 - Marathi welcome and preview images were visually checked; see [validation notes](docs/VALIDATION.md).
 - Physical-phone recognition, actual voice gender and camera OCR were not verified for this delivery. Check these on your device.
 
-This version adds the assistant, language interface and appearance preview to the original ML Kit app. It does not include the separate Progress Handoff project’s page-by-page PDF reader, or claim improved OCR accuracy.
+This version combines the original ML Kit app, assistant, language interface and appearance preview with the Progress Handoff project’s PDF page-reader features. This is a reading/navigation improvement, not a claim of improved OCR accuracy. See docs/VALIDATION.md for the verification scope.
