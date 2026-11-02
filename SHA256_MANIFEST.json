@@ -3,7 +3,7 @@
   "analysis_options.yaml": "ed2822598abd3fbfe46e42ef59c7a6d16eaff7bc5b7531e6d6c598d17ffc7b19",
   "pubspec.lock": "c281574897cad57f7b7d5a44f7bae048c1887173e75217e8dbe6ee7e995c5451",
   "pubspec.yaml": "3ca69947bb7c0edb3f5f947316d81f601508e234a2e6900cfabf1e1c70b7e770",
-  "README.md": "2d1b778bd15d7f5469f9a2603b145b99ff5189a3b0826115790da80af6fbba05",
+  "README.md": "9fcf0cd5ba1896fbffaab19731fe9554cad3e2a104095944fb80b29c91e6b2be",
   "VOICE_ASSISTANT.apk": "adb661386adff546b476d355a25b40052d71aa7f1735e1b8e752d9ffd66a3dbe",
   "android/build.gradle.kts": "6a26dba2cb8dfba1e74f540b0d17a89d96c1301d3c3bfda14348bed257fddcba",
   "android/gradle.properties": "3d21bb28e886dd4677ba203f0b60145a3233ff77f2123f0ea2721265893efce7",
@@ -266,5 +266,6 @@
   "android/app/src/main/kotlin/com/example/aksharally_ui/AssistantVoiceChannel.kt": "56a9c83b6be61175653b517566513fc21379ca31fc8f958cf50c1df9058a7852",
   "android/app/src/main/kotlin/com/example/aksharally_ui/LocalPdfChannel.kt": "9d1581f2bb37b3a58afda48d6cce575dbda8713f79b2e449fa34f11f118051e8",
   "android/app/src/main/kotlin/com/example/aksharally_ui/MainActivity.kt": "5990004dc4abc2dd8c1d3a016bb5993bdbdaf0642b7c19d9241b9310b9bc300d",
-  "android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java": "927480199b5bd2ac00008d1777bdbfa3fb2de9b602bca428fe7411452e37f37c"
+  "android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java": "927480199b5bd2ac00008d1777bdbfa3fb2de9b602bca428fe7411452e37f37c",
+  "docs/USER_GUIDE.md": "06c33d8e8112f09328314821dbec5668c76b998f4315fb1fa319200621278f78"
 }
