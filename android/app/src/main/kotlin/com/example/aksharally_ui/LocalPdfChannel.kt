@@ -51,7 +51,10 @@ class LocalPdfChannel(private val context: Context, messenger: BinaryMessenger) 
                             stripper.startPage = number; stripper.endPage = number
                             stripper.sortByPosition = false
                             val text = stripper.getText(session.document)
-                            if (text.isNotBlank() && !text.contains('\uFFFD')) {
+                            // forceImage: Dart found the text layer unusable (legacy Hindi font,
+                            // scrambled matras) and wants the rendered page for OCR instead.
+                            val forceImage = call.argument<Boolean>("forceImage") == true
+                            if (!forceImage && text.isNotBlank() && !text.contains('\uFFFD')) {
                                 mapOf("kind" to "native", "text" to text)
                             } else {
                                 val target = File(requireNotNull(call.argument<String>("target")))

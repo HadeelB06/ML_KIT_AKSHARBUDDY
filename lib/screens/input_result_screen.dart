@@ -104,6 +104,51 @@ class _InputResultScreenState extends State<InputResultScreen> with LanguageRebu
     }
   }
 
+  /// Plain-language reason for a highlighted word (dyslexia-friendly).
+  String? _why(Map<String, dynamic> e) {
+    final reasons = [...((e['reasons'] as List?) ?? const [])];
+    if (reasons.contains('invalid_time')) return 'This time may be misread.';
+    if (reasons.contains('invalid_date')) return 'This date may be misread.';
+    if (reasons.contains('mixed_digit_systems') ||
+        reasons.contains('digit_letter_confusion')) {
+      return 'A number here may be misread.';
+    }
+    if (reasons.contains('broken_matra_sequence') ||
+        reasons.contains('mixed_script_word')) {
+      return 'A letter or matra here may be misread.';
+    }
+    if (e['suspect'] == true) return 'The phone was not sure about this part.';
+    return null;
+  }
+
+  /// Applies the pipeline's suggested reading for one line, only because the
+  /// reader confirmed it. Raw OCR stays untouched; this is stored as an edit.
+  Future<void> useSuggestion(
+    int index,
+    Map<String, dynamic> element,
+    String key,
+  ) async {
+    final page = document.pages[index];
+    final from = element['lineText'] as String?;
+    final to = element['lineSuggestion'] as String?;
+    if (from == null || to == null || !page.displayText.contains(from)) return;
+    final pages = document.pages.toList();
+    pages[index] = page.edited(page.displayText.replaceFirst(from, to));
+    final updated = document.withPages(pages);
+    try {
+      await OcrStore.save(updated);
+      if (mounted) {
+        setState(() {
+          document = updated;
+          accepted.add(key);
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => saveError = 'Could not save your choice.');
+    }
+  }
+
   Future<void> word(int index, Map<String, dynamic> element) async {
     final page = document.pages[index];
     final key = '$index:${element['box']}:${element['text']}';
@@ -120,6 +165,19 @@ class _InputResultScreenState extends State<InputResultScreen> with LanguageRebu
                 element['text'] as String,
                 style: Theme.of(c).textTheme.headlineSmall,
               ),
+              if (_why(element) != null) ...[
+                const SizedBox(height: 6),
+                LText(_why(element)!),
+              ],
+              if (element['lineSuggestion'] is String) ...[
+                const SizedBox(height: 12),
+                const LText('Does the original say this instead?'),
+                const SizedBox(height: 6),
+                FilledButton(
+                  onPressed: () => Navigator.pop(c, 'use'),
+                  child: Text(element['lineSuggestion'] as String),
+                ),
+              ],
               if (page.recognitionImagePath != null)
                 SizedBox(
                   height: 100,
@@ -160,6 +218,7 @@ class _InputResultScreenState extends State<InputResultScreen> with LanguageRebu
     await voice.stop();
     if (!mounted) return;
     if (action == 'accept') setState(() => accepted.add(key));
+    if (action == 'use') await useSuggestion(index, element, key);
     if (action == 'edit') await edit(index);
     if (action == 'retake' && mounted) Navigator.pop(context);
   }

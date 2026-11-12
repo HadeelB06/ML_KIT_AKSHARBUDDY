@@ -9,6 +9,7 @@ import '../models/ocr_document.dart';
 import '../services/mlkit_ocr_service.dart';
 import '../services/ocr_store.dart';
 import '../services/image_input_service.dart';
+import '../services/scan_service.dart';
 import '../services/document_input_service.dart';
 import 'input_result_screen.dart';
 import 'image_crop_screen.dart';
@@ -154,6 +155,29 @@ class _ReadingScreenState extends State<ReadingScreen> with LanguageRebuild<Read
         xf.name,
         source == ImageSource.camera ? 'camera' : 'gallery',
       );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+    }
+  }
+
+  /// Best input for paper: Google's on-device scanner flattens, de-shadows
+  /// and crops the page before OCR.
+  Future<void> _scanPage() async {
+    File? file;
+    try {
+      file = await ScanService.scanPage();
+    } catch (_) {
+      if (!mounted) return;
+      setState(
+        () => _error =
+            'The page scanner is not available on this phone. Please use Take a photo.',
+      );
+      return;
+    }
+    if (file == null) return; // closed without scanning
+    try {
+      await _acceptFile(file, file.uri.pathSegments.last, 'camera');
     } catch (e) {
       if (!mounted) return;
       setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
@@ -398,6 +422,7 @@ class _ReadingScreenState extends State<ReadingScreen> with LanguageRebuild<Read
         language: _language,
         sourceType: _sourceType,
         originalPath: original.path,
+        importantNumbers: _importantNumbers,
       );
       document = OcrDocument(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
@@ -551,6 +576,12 @@ class _ReadingScreenState extends State<ReadingScreen> with LanguageRebuild<Read
                           'A clear, well-lit photo gives the best starting point.',
                         ),
                         const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: _isLoading ? null : _scanPage,
+                          icon: const Icon(Icons.document_scanner_outlined),
+                          label: const LText('Scan a page (fixes tilt & shadows)'),
+                        ),
+                        const SizedBox(height: 12),
                         OutlinedButton.icon(
                           onPressed: _isLoading
                               ? null
@@ -599,6 +630,18 @@ class _ReadingScreenState extends State<ReadingScreen> with LanguageRebuild<Read
                               fit: BoxFit.contain,
                             ),
                           ),
+                          if (_prepared!.tip != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(Icons.tips_and_updates_outlined),
+                                  const SizedBox(width: 8),
+                                  Expanded(child: LText(_prepared!.tip!)),
+                                ],
+                              ),
+                            ),
                           Wrap(
                             spacing: 8,
                             children: [

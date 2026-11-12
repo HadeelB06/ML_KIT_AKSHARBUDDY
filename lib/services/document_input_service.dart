@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'docx_input_service.dart';
 import '../models/ocr_document.dart';
 import 'mlkit_ocr_service.dart';
+import 'ocr/ocr_rules.dart';
 import 'ocr_store.dart';
 
 class DocumentSession {
@@ -90,11 +91,25 @@ class DocumentInputService {
           } else {
             final dir = await OcrStore.directory();
             final target = '${dir.path}/pdf_${document.id}_$n.png';
-            final data = await _channel.invokeMapMethod<String, dynamic>(
+            var data = await _channel.invokeMapMethod<String, dynamic>(
               'page',
               {'token': session.token, 'page': n, 'target': target},
             );
             if (data == null) throw StateError('Page returned no result.');
+            // Many Hindi/Marathi PDFs use legacy fonts (Kruti Dev etc.): the
+            // text layer looks fine on screen but extracts as "Hkkjr ljdkj".
+            // Such pages are rendered and OCR'd instead of read aloud as junk.
+            if (data['kind'] == 'native' &&
+                !pdfTextLooksUsable(data['text'] as String, language)) {
+              progress('Page $n: re-reading the printed page');
+              data = await _channel.invokeMapMethod<String, dynamic>('page', {
+                'token': session.token,
+                'page': n,
+                'target': target,
+                'forceImage': true,
+              });
+              if (data == null) throw StateError('Page returned no result.');
+            }
             if (data['kind'] == 'native') {
               page = OcrPage(
                 rawOcrText: data['text'] as String,
@@ -111,6 +126,7 @@ class DocumentInputService {
                 sourceType: 'pdf-mlkit',
                 originalPath: session.originalPath,
                 pageNumber: n,
+                importantNumbers: importantNumbers,
               );
             }
           }
