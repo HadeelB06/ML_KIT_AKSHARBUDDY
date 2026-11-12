@@ -592,7 +592,7 @@ class _Line {
     'status': status,
     'reasons': reasons.toList(),
     'retried': retried,
-    if (suggestion case final s?) 'suggestion': s,
+    'suggestion': ?suggestion,
     if (alternatives.isNotEmpty) 'alternatives': alternatives,
     'box': _boxJson,
     'confidence': confidence,
